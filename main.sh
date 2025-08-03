@@ -1,6 +1,5 @@
 #!/bin/bash
 
-SESSION=
 FILENAME=
 ON_SAVE=
 VIDEO_TITLE="Test Title"
@@ -9,14 +8,14 @@ VIDEO_DESCRIPTION="Test Description"
 while [[ $# -gt 0 ]]; do
   case $1 in
     --session)
-      SESSION="$2"
+      NICOLIVE_SESSION="$2"
       shift 2
       ;;
     --output-mode)
       if [ "$2" = "youtube" ]; then
         ON_SAVE="upload_youtube"
       else
-        echo "--output-mode: youtube" >&2
+        echo "--output-mode: is only supported youtube" >&2
         exit 1
       fi
       shift 2
@@ -46,10 +45,6 @@ if [ -z "$LVID" ]; then
   exit 1
 fi
 
-if [ -z "$SESSION" ]; then
-  SESSION="$NICOLIVE_SESSION"
-fi
-
 if [ -z "$FILENAME" ]; then
   FILENAME="$LVID.mp4"
 fi
@@ -58,14 +53,19 @@ if [ "$OUTPUT_MODE" = "youtube" ]; then
   ON_SAVE="upload_youtube"
 fi
 
-echo "SESSION: $SESSION"
-echo "LVID: $LVID"
-echo "OUTPUT: $FILENAME"
+OUTPUT="$FILENAME"
+if [ -n "$DIST_DIR" ]; then
+  OUTPUT="$DIST_DIR/$OUTPUT"
+fi
 
-if [ -z "$SESSION" ]; then
-  streamlink "https://live.nicovideo.jp/watch/$LVID" best -O | ffmpeg -i - -c copy "$FILENAME"
+echo "SESSION: $NICOLIVE_SESSION"
+echo "LVID: $LVID"
+echo "OUTPUT: $OUTPUT"
+
+if [ -z "$NICOLIVE_SESSION" ]; then
+  streamlink "https://live.nicovideo.jp/watch/$LVID" best -O | ffmpeg -i - -c copy "$OUTPUT"
 else
-  streamlink --niconico-user-session="$SESSION" "https://live.nicovideo.jp/watch/$LVID" best -O | ffmpeg -i - -c copy "$FILENAME"
+  streamlink --niconico-user-session="$NICOLIVE_SESSION" "https://live.nicovideo.jp/watch/$LVID" best -O | ffmpeg -i - -c copy "$OUTPUT"
 fi
 
 if [ "$ON_SAVE" = "upload_youtube" ]; then

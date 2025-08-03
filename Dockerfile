@@ -15,4 +15,6 @@ COPY main.sh upload_video.py requirements.txt ./
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-CMD [ "./main.sh" ]
+ENV DIST_DIR=dist
+
+ENTRYPOINT [ "./main.sh" ]
